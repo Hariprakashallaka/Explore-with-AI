@@ -17,41 +17,42 @@ client = genai.Client(api_key=API_KEY)
 def generate_itinerary(destination, days, nights, budget, interests):
 
     prompt = f"""
-You are a professional AI travel planner.
+You are an expert AI travel planner.
 
-Create a personalized and detailed travel itinerary.
+Create a highly detailed, realistic, and NON-REPETITIVE travel itinerary.
 
+Trip Details:
 Destination: {destination}
 Duration: {days} Days and {nights} Nights
-Budget Type: {budget}
-Travel Interests: {', '.join(interests)}
+Budget: {budget}
+User Interests: {', '.join(interests)}
 
-IMPORTANT:
-- Generate itinerary for EXACTLY {days} days.
-- Create separate detailed section for each day from Day 1 to Day {days}.
-- Do NOT skip any day.
-- Do NOT stop early.
-- Make each day unique.
-- Adjust activities based on budget.
-- Focus strongly on selected interests.
+STRICT RULES:
+- Generate EXACTLY {days} days.
+- Each day must be COMPLETELY DIFFERENT.
+- Do NOT repeat the same attractions.
+- Do NOT repeat similar wording.
+- Rotate themes across days (culture, adventure, food, relaxation, shopping, nature, local life).
+- Include specific place examples (realistic but general).
+- Adjust activities based on budget level.
+- Strongly focus on selected interests.
+- Keep content practical and realistic.
 - Use proper markdown formatting.
 
-Format:
+FORMAT:
 
 ## {destination} {days} Days & {nights} Nights Itinerary
 
-Write a short introduction paragraph.
+Write a short engaging introduction paragraph.
 
-Then generate:
+Then for each day:
 
-**Day 1:**
-**Morning:** ...
-**Afternoon:** ...
-**Evening:** ...
+**Day 1 – Theme of the Day**
+**Morning:** Detailed activity  
+**Afternoon:** Detailed activity  
+**Evening:** Detailed activity  
 
-Continue this format until:
-
-**Day {days}:**
+Continue this structure until Day {days}.
 """
 
     try:
@@ -59,23 +60,36 @@ Continue this format until:
             model=MODEL_NAME,
             contents=prompt
         )
+
         return response.text
 
     except Exception:
-        # Fallback dynamic version
+        # Improved dynamic fallback with variation
         fallback = f"""
 ## {destination} {days} Days & {nights} Nights Itinerary
 
 This personalized itinerary focuses on {', '.join(interests)} experiences under a {budget} budget.
 """
 
+        themes = [
+            "Cultural Exploration",
+            "Adventure & Outdoor",
+            "Local Cuisine Discovery",
+            "Historical Landmarks",
+            "Nature & Scenic Views",
+            "Shopping & Local Markets",
+            "Relaxation & Leisure"
+        ]
+
         for i in range(1, days + 1):
+            theme = themes[(i - 1) % len(themes)]
+
             fallback += f"""
 
-**Day {i}:**
-**Morning:** Explore main attractions.
-**Afternoon:** Enjoy local experiences.
-**Evening:** Relax and explore markets.
+**Day {i} – {theme}**
+**Morning:** Start your day with a {theme.lower()} experience exploring a key attraction in {destination}.
+**Afternoon:** Continue with engaging activities related to {theme.lower()} while enjoying local atmosphere.
+**Evening:** Wind down with a unique evening experience aligned with {theme.lower()}.
 """
 
         return fallback
